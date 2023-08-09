@@ -1,0 +1,29 @@
+What would your organization have to purchase to reproduce your architecture in a private cloud while providing relatively the same level of availability as your cloud implementation? 
+	To replicate my application, they need to purhcase servers to host front end and backedn, docker license to use images, a database server, an object storage device, license to Amazon rekognition to any other image processing software(like OpenCV, Microsoft Computer Vision API, Google Cloud Vision API, ), serivce to send email notifications, serverless features to execute the lambda.
+
+Try to give a rough estimate of what it would cost, don't worry if you are far off. 
+
+These systems are complicated and you don't know all the exact equipment and software you would need to purchase. 
+Just explore and try your best to figure out the combination of software and hardware you would need to buy to reproduce your app on-premise.
+
+Minimal Server Needs for running a small e-commerce or company website, email server, and file storage.
+Server Specs : E3-1240 v5 (3.50 GHz), 32GB RAM, 500GB SSD
+Up Front Cost: Server: $1476, RAM: $147, HDD:  $95Total: $1718
+Monthly Cost: Estimated $30.24 for power + cooling and internet expenses.
+
+
+Amazon Rekognition:-
+Cost type 	: 	Pricing : 	Usage cost
+First 1 million images : $0.0010 per image : 1,000,000 images X $0.0010/image = $1,000
+Usage cost
+
+
+Docker licnce:Cost=0 
+Personal - Ideal for individual developers, education, and open source communities.
+
+EMail:
+SNS: First 1 million Amazon SNS requests per month are free, $0.50 per 1 million requests thereafter
+
+
+MongoDB: -$57/month
+Dedicated server :

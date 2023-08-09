@@ -1,0 +1,14 @@
+docker run -p 5000:5000 -e AWS_ACCESS_KEY_ID=ASIAT4G3KOKVVW7T7FGY -e AWS_SECRET_ACCESS_KEY=YiG3CgPcZN1FrTDCcOHRWxRG8W23jVAFseFr1Zuv -e AWS_SESSION_TOKEN=FwoGZXIvYXdzEPr//////////wEaDEtTZ9kvdQz+lYbGMiLAAZ6AzxOW2SrWKjOQKLiMWmlUkUB7164lIdHF9fj6wmZamtjkl3Dyy6+qJUwb7jfySEGJspOjsZyR2m/Yrxi/f6z8bm79t7xyHsXhCrxWUTO/D3AhXvD7xl1s+/4Z39UEHjs+1rimHMV+pkK9HsrFVRPFkpEIwDjEN/IQXSRrkXWMCe4Iai9kuCdDiofh3Ll2u+M3/rHMhqqO+jqNVdASF8DCDW41CZv0D4WElbEI76verdBokF6HmUQBtILjpcS2ByjXuJGmBjItZNLyio90dg6UY+aMn80xTBjAokPcJcla4EC/s5rpYWGZYfaxmurvqo3KJFr6 -e AWS_REGION=us-east-1 backend-app
+
+Docker push:-
+    backend:
+        docker tag flask-app-back-end vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+        docker push vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+    frontend:
+        docker tag my-react-app vikramvenkatapathi/cloud_term_assignment_frontend:my-react-app
+        docker push vikramvenkatapathi/cloud_term_assignment_frontend:my-react-app
+
+Create ec2 stack:
+
+aws --region us-east-1 cloudformation create-stack --stack-name backend-ec2 --template-body file://launch_bacend_ec2.yaml
+aws cloudformation delete-stack --stack-name backend-ec2

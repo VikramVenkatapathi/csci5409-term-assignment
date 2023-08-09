@@ -1,0 +1,20 @@
+          #!/bin/bash
+
+          # Update the system
+          sudo yum update -y
+
+          # Install Docker
+          sudo yum install -y docker
+
+          # Start the Docker service.
+          sudo service docker start
+
+          # Add the ec2-user to the docker group so that you can run Docker commands without using sudo.
+          sudo usermod -a -G docker ec2-user
+
+          docker login --username vikramvenkatapathi --password '#Vikram2000'
+
+          # Pull the Docker image from Docker Hub
+          docker pull vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+          # Run the Docker container
+          docker run -p 5000:5000 vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end

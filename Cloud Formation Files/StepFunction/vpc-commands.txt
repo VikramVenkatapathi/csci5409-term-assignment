@@ -1,0 +1,4 @@
+Create ec2 stack:
+
+aws --region us-east-1 cloudformation create-stack --stack-name vpc-ec2-sg-subnet --template-body file://vpc_ec2_sg_subnet.yaml
+aws cloudformation delete-stack --stack-name vpc-ec2-sg-subnet

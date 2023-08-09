@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create an S3 bucket for user images
+
+Resources:
+  UserImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: b00936916-user-images
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true
+
+  UserReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: b00936916-user-report
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  UserReportsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref UserReportsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: Policy1690593190782
+        Statement:
+          - Sid: Stmt1690593188760
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join [ "", ["arn:aws:s3:::", !Ref UserReportsBucket, "/*"] ]
+
+  BackendIpBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: backend-ip
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  BackendIpBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackendIpBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: Policy1690593190782
+        Statement:
+          - Sid: Stmt1690593188769
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join [ "", ["arn:aws:s3:::backend-ip/*"] ]

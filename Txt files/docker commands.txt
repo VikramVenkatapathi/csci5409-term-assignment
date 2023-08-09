@@ -1,0 +1,16 @@
+docker build -t gcr.io/YOUR_PROJECT_ID/your-image-name:tag .
+docker push gcr.io/YOUR_PROJECT_ID/your-image-name:tag
+
+docker build -t northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-cntr1/cntr1 .
+docker push northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-cntr1/cntr1:latest
+
+
+docker build -t northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-cntr2/cntr2 .
+docker push northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-cntr2/cntr2:latest
+
+
+docker build -t northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-cntr3/cntr3 .
+docker push northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-cntr3/cntr3:latest
+
+docker build -t northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-react-app-frontend/react-app-fe .
+docker push northamerica-northeast1-docker.pkg.dev/assignment-2-390620/a2-react-app-frontend/react-app-fe:latest

@@ -1,0 +1,73 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Launch an EC2 instance with Docker and your Flask application
+
+Parameters:
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+    ConstraintDescription: Must be a valid EC2 instance type from the list.
+
+Resources:
+  BackEndEC2Instance: #EC2 instance for the backend in Flask   
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2:1}}'
+      SecurityGroups:
+        - !Ref BackendSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+         #!/bin/bash
+
+          # Update the system
+          sudo yum update -y
+
+          # Install Docker
+          sudo yum install -y docker
+
+          # Start the Docker service.
+          sudo service docker start
+
+          # Add the ec2-user to the docker group so that you can run Docker commands without using sudo.
+          sudo usermod -a -G docker ec2-user
+
+          docker login --username vikramvenkatapathi --password '#Vikram2000'
+
+          # Pull the Docker image from Docker Hub
+          docker pull vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+          
+          # Run the Docker container
+          docker run -d -p 5000:5000 vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+          
+          BACKEND_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+          echo "$BACKEND_IP" > /tmp/backend_ip.txt
+
+          # Install and configure AWS CLI
+          sudo yum install -y aws-cli
+
+          aws s3 cp /tmp/backend_ip.txt s3://backend-ip/backend_ip.txt
+      IamInstanceProfile: LabInstanceProfile #name of instance profile, not ARN!!!
+
+  BackendSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access and HTTP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 5000
+          ToPort: 5000
+          CidrIp: 0.0.0.0/0
+
+Outputs:
+  InstanceId:
+    Value: !Ref BackEndEC2Instance
+    Description: Instance Id of the EC2 instance.

@@ -1,0 +1,807 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Provision resources required for term assignment
+
+Parameters:
+
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+    ConstraintDescription: Must be a valid EC2 instance type from the list.
+
+  LambdaRoleARN:
+    Description: ARN of the IAM Role for Lambda functions
+    Type: String
+    Default: arn:aws:iam::990326895171:role/LabRole
+
+Resources:
+  UserImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: b00936916-user-images
+      NotificationConfiguration:
+        EventBridgeConfiguration:
+          EventBridgeEnabled: true #enable this for step function to invoke on "Object Created" event
+
+  UserReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: b00936916-user-report
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  UserReportsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref UserReportsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: Policy1690593190782
+        Statement:
+          - Sid: Stmt1690593188760
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join [ "", ["arn:aws:s3:::", !Ref UserReportsBucket, "/*"] ]
+
+  BackendIpBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: backend-ip
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  BackendIpBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackendIpBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Id: Policy1690593190782
+        Statement:
+          - Sid: Stmt1690593188769
+            Effect: Allow
+            Principal: '*'
+            Action: 's3:GetObject'
+            Resource: !Join [ "", ["arn:aws:s3:::backend-ip/*"] ]
+
+  UserRegistrationTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: UserRegistration
+      AttributeDefinitions:
+        - AttributeName: Email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Email
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  BackEndEC2Instance: #EC2 instance for the backend in Flask
+    Type: 'AWS::EC2::Instance'
+    DependsOn: BackendIpBucket
+    Properties:
+      InstanceType: !Ref InstanceType
+      Tags:
+        - Key: Name
+          Value: BackEndEC2Instance
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2:1}}'
+      SecurityGroups:
+        - !Ref BackendSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          # Update the system
+          sudo yum update -y
+
+          # Install Docker
+          sudo yum install -y docker
+
+          # Start the Docker service.
+          sudo service docker start
+
+          # Add the ec2-user to the docker group so that you can run Docker commands without using sudo.
+          sudo usermod -a -G docker ec2-user
+
+          docker login --username vikramvenkatapathi --password '#Vikram2000'
+
+          # Pull the Docker image from Docker Hub
+          docker pull vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+
+          # Run the Docker container
+          docker run -d -p 5000:5000 vikramvenkatapathi/cloud_term_assignment_backend:flask-app-back-end
+          
+          BACKEND_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
+          echo "$BACKEND_IP" > backend_ip.txt
+
+          # Install and configure AWS CLI
+          sudo yum install -y aws-cli
+
+          aws s3 cp backend_ip.txt s3://backend-ip/backend_ip.txt
+      IamInstanceProfile: LabInstanceProfile #name of instance profile, not ARN!!!
+
+  BackendSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access and HTTP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp #to receive requests via port 5000 (default port of flask app)
+          FromPort: 5000
+          ToPort: 5000
+          CidrIp: 0.0.0.0/0
+
+  FrontEndEC2Instance: #EC2 instance for the backend in Flask
+    Type: 'AWS::EC2::Instance'
+    DependsOn: BackendIpBucket
+    Properties:
+      InstanceType: !Ref InstanceType
+      Tags:
+        - Key: Name
+          Value: FrontEndEC2Instance
+      ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2:1}}'
+      SecurityGroups:
+        - !Ref FrontendSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          # Update the system
+          sudo yum update -y
+          
+          # Install Docker
+          sudo yum install -y docker
+
+          # Start the Docker service.
+          sudo service docker start
+
+          # Add the ec2-user to the docker group so that you can run Docker commands without using sudo.
+          sudo usermod -a -G docker ec2-user
+    
+          # Fetch the backend IP from the S3 bucket
+          PRE_SIGNED_URL=$(aws s3 presign s3://backend-ip/backend_ip.txt --expires-in 3600)
+          #downloads the file
+          curl -o backend_ip.txt "$PRE_SIGNED_URL" 
+
+          BACKEND_IP=$(cat backend_ip.txt)
+
+          # Set the backend IP as an environment variable
+          export REACT_APP_API_URL=$BACKEND_IP
+          docker login --username vikramvenkatapathi --password '#Vikram2000'
+
+          # Pull the Docker image from Docker Hub
+          docker pull vikramvenkatapathi/cloud_term_assignment_frontend:my-react-app
+          
+          # Run the Docker container
+          docker run -e REACT_APP_API_URL=$BACKEND_IP -d -p 3000:3000 vikramvenkatapathi/cloud_term_assignment_frontend:my-react-app
+      IamInstanceProfile: LabInstanceProfile #name of instance profile, not ARN!!!
+
+  FrontendSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH, HTTP, HTTPS access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000 #to receive requests via port 3000 from the internet(default port of react app)
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp #defniitely need for git
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+  S3ImageUploadTriggerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: S3_Image_Upload_Trigger_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import json
+
+          def lambda_handler(event, context):
+              # Extract relevant information from the event
+              bucket_name = event['detail']['bucket']['name']
+              object_key = event['detail']['object']['key']
+          
+              # Construct the response object with the event information
+              response = {
+                  'statusCode': 200,
+                  'body': 'Image upload Lambda function executed successfully!',
+                  'event': event  # Include the entire event object in the response
+              }
+          
+              return response
+      Role: !Sub ${LambdaRoleARN}
+
+  ProcessFacialAnalysisFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ProcessFacialAnalysis_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import boto3
+
+          rekognition = boto3.client('rekognition')
+
+          def detect_faces(image_bytes):
+              # Call AWS Rekognition API for face detection
+              response = rekognition.detect_faces(
+                  Image={
+                      'Bytes': image_bytes
+                  },
+                  Attributes=['ALL']  # To get detailed facial attributes like emotions, landmarks, etc.
+              )
+
+              return response
+
+          def analyze_facial_attributes(face_details_list):
+              # Process the facial attributes detected by Rekognition for each face
+              facial_attributes_list = []
+              for face_detail in face_details_list:
+                  age_range = face_detail.get('AgeRange')
+                  emotions = face_detail.get('Emotions')
+                  filtered_emotions = []
+
+                  if emotions:
+                      for emotion in emotions:
+                          confidence = emotion['Confidence']
+                          if confidence > 50:
+                              filtered_emotions.append(emotion['Type'])
+
+                  landmarks = face_detail.get('Landmarks')
+
+                  # Store the facial attributes in a dictionary for each face
+                  facial_attributes = {
+                      'AgeRange': age_range,
+                      'Emotions': filtered_emotions,
+                      # 'Landmarks': landmarks,
+                  }
+
+                  # Add other facial attributes here with similar checks
+                  gender = face_detail.get('Gender')
+                  if gender:
+                      facial_attributes['Gender'] = gender['Value']
+
+                  smile = face_detail.get('Smile')
+                  if smile:
+                      facial_attributes['Smile'] = smile['Value']
+                      facial_attributes['SmileConfidence'] = smile['Confidence']
+
+                  eyeglasses = face_detail.get('Eyeglasses')
+                  if eyeglasses:
+                      facial_attributes['Eyeglasses'] = eyeglasses['Value']
+                      facial_attributes['EyeglassesConfidence'] = eyeglasses['Confidence']
+
+                  facial_attributes_list.append(facial_attributes)
+              print("facial_attributes_list: ", facial_attributes_list)
+              return facial_attributes_list
+
+          def lambda_handler(event, context):
+              # Extract image bytes from the S3 event
+              bucket_name = event['event']['detail']['bucket']['name']
+              object_key = event['event']['detail']['object']['key']
+
+              s3 = boto3.resource('s3')
+              obj = s3.Object(bucket_name, object_key)
+              image_bytes = obj.get()['Body'].read()
+
+              # Detect faces in the image
+              response = detect_faces(image_bytes)
+
+              if 'FaceDetails' in response:
+                  face_details_list = response['FaceDetails']
+                  facial_attributes_list = analyze_facial_attributes(face_details_list)
+                  return {"facial_attributes_list": facial_attributes_list}
+              else:
+                  return {'message': 'No faces detected in the image.'}
+      Role: !Sub ${LambdaRoleARN}
+
+  ProcessCelebritiesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ProcessCelebrities_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import boto3
+
+          rekognition = boto3.client('rekognition')
+
+          def lambda_handler(event, context):
+              try:
+                  # Extract relevant information from the event
+                  bucket_name = event['event']['detail']['bucket']['name']
+                  object_key = event['event']['detail']['object']['key']
+
+                  # Detect celebrities in the image
+                  response_celebs = rekognition.recognize_celebrities(
+                      Image={
+                          'S3Object': {
+                              'Bucket': bucket_name,
+                              'Name': object_key
+                          }
+                      }
+                  )
+
+                  # Process the results
+                  celebrities = response_celebs['CelebrityFaces'] if 'CelebrityFaces' in response_celebs else []
+
+                  detected_celebrities = []
+                  for celebrity in celebrities:
+                      celebrity_name = celebrity['Name']
+                      confidence = celebrity['MatchConfidence']
+
+                      # Construct the celebrity object for each detected celebrity
+                      detected_celeb = {
+                          'name': celebrity_name,
+                          'confidence': confidence
+                      }
+
+                      # Add the celebrity to the list
+                      detected_celebrities.append(detected_celeb)
+
+                  print(detected_celebrities)
+                  return {
+                      'detected_celebrities': detected_celebrities
+                  }
+
+              except Exception as e:
+                  return {
+                      'statusCode': 500,
+                      'error': str(e)
+                  }
+      Role: !Sub ${LambdaRoleARN}
+
+  ProcessLabelsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ProcessLabels_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import boto3
+          import json
+
+          lambda_client = boto3.client('lambda')
+          rekognition = boto3.client('rekognition')
+          def lambda_handler(event, context):
+              # Extract relevant information from the event
+              bucket_name = event['event']['detail']['bucket']['name']
+              object_key = event['event']['detail']['object']['key']
+              # user_email = object_key.split('/')[0]
+              # Detect labels in the image
+              response_labels = rekognition.detect_labels(
+                  Image={
+                      'S3Object': {
+                          'Bucket': bucket_name,
+                          'Name': object_key
+                      }
+                  },
+                  MaxLabels=10,
+                  MinConfidence=70
+              )
+              print(response_labels)
+              # Process the results
+              labels = response_labels['Labels']
+
+              # Extract labels and their detected confidence levels
+              detected_labels = []
+              for label in labels:
+                  label_name = label['Name']
+                  confidence = label['Confidence']
+                  detected_labels.append({
+                      'label': label_name,
+                      'confidence': confidence
+                  })
+
+              # Prepare the JSON response
+              json_response = {
+                  'detected_labels': detected_labels
+              }
+              print(json_response)
+
+              return json_response
+      Role: !Sub ${LambdaRoleARN}
+
+  GetObjectKeyFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: GetObjectKey_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import json
+
+          def lambda_handler(event, context):
+              # Extract the object_key from the event
+              object_key = event['event']['detail']['object']['key']
+
+              # Create the response
+              response = {
+                  "object_key": object_key
+              }
+
+              return response
+      Role: !Sub ${LambdaRoleARN}
+
+  FormProcessingReportFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: FormProcessingReport_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import boto3
+          import os
+          import json
+
+          s3 = boto3.client('s3')
+
+          def create_file_content(facial_attributes_list, detected_celebrities_list, detected_labels_list, object_key):
+              # Format the facial attributes list
+              facial_attributes_content = "Facial Attributes List:\n"
+              for attributes in facial_attributes_list:
+                  facial_attributes_content += f"{attributes}\n"
+
+              # Format the detected celebrities list
+              detected_celebrities_content = "Detected Celebrities List:\n"
+              for celebrity in detected_celebrities_list:
+                  detected_celebrities_content += f"{celebrity}\n"
+
+              # Format the detected labels list
+              detected_labels_content = "Detected Labels List:\n"
+              for label in detected_labels_list:
+                  detected_labels_content += f"{label}\n"
+
+              # Combine all the content with dotted lines
+              content = f"{facial_attributes_content}\n{'.'*50}\n\n{detected_celebrities_content}\n{'.'*50}\n\n{detected_labels_content}\n{'.'*50}\n\n"
+
+              return content
+
+          def lambda_handler(event, context):
+              try:
+                  # input_json = json.dumps(event)
+                  facial_attributes_json = event[0]
+                  # Extract relevant information from the input JSON
+                  facial_attributes_list = facial_attributes_json['facial_attributes_list']
+                  # facial_attributes_json_final =  facial_attributes_list[0]
+                  print("facial_attributes_list: ",facial_attributes_list)
+
+                  detected_celebrities_json = event[1]
+                  detected_celebrities_list = detected_celebrities_json['detected_celebrities']
+                  # detected_celebrities_json_final = detected_celebrities_list[0]
+                  print("detected_celebrities_list: ",detected_celebrities_list)
+
+                  detected_labels_json = event[2]
+                  detected_labels_list = detected_labels_json['detected_labels']
+                  # detected_labels_json_final = detected_labels_list[0]
+                  print("detected_labels_list: ",detected_labels_list)
+
+                  object_key = event[3].get('object_key')
+                  print("object_key: ",object_key)
+
+                  # Create the file content
+                  file_content = create_file_content(facial_attributes_list, detected_celebrities_list, detected_labels_list, object_key)
+
+                  # Create the folder structure using the user's email as the folder name
+                  user_email = object_key.split('/')[0]
+                  file_name = os.path.basename(object_key)
+                  folder_path = f"{user_email}/{file_name}.txt"
+
+                  # Upload the file to S3
+                  bucket_name = "b00936916-user-report"
+                  s3.put_object(Bucket=bucket_name, Key=folder_path, Body=file_content, ContentDisposition="attachment")
+
+                  return {
+                      'statusCode': 200,
+                      'body': 'File creation and upload successful!',
+                      "object_key": object_key
+                  }
+
+              except Exception as e:
+                  return {
+                      'statusCode': 500,
+                      'body': f'Error occurred: {str(e)}'
+                  }
+      Role: !Sub ${LambdaRoleARN}
+
+  SendNotificationWithResultsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: SendNotificationWithResults_v1
+      Handler: index.lambda_handler
+      Runtime: python3.8
+      Code:
+        ZipFile: |
+          import json
+          import boto3
+          import os
+          import re
+
+          s3 = boto3.client('s3')
+          sns = boto3.client('sns')
+
+          def get_user_email(object_key):
+              # Extract the email from the object key
+              parts = object_key.split('_')
+              if len(parts) >= 1:
+                  user_email = parts[0]
+                  return user_email
+              return None
+
+          def get_matching_topics(email):
+              # List all SNS topics and filter the ones with the name format "SendDetectionInfoTo<userNamefromEmail>"
+              topic_prefix = f"SendDetectionInfoTo{email.split('@')[0]}"
+              response = sns.list_topics()
+              topics = response.get('Topics', [])
+              matching_topics = [topic['TopicArn'] for topic in topics if topic_prefix in topic['TopicArn']]
+
+              return matching_topics
+
+          def send_notification_to_topics(object_key, topics):
+              # Get the S3 bucket name from the object key
+              bucket_name = "b00936916-user-report"
+
+              # Construct the S3 URL
+              s3_url = f"https://{bucket_name}.s3.amazonaws.com/{object_key}.txt"
+
+              # Publish a message to each of the matching topics with the object key as the message body
+              message_data = {
+                  'text': 'Your Image analysis results are ready!\n Please refer to the below attachment for the detection results.',
+                  'attachment': s3_url
+              }
+              message = "Your Image analysis results are ready!\n Please visit the URL for the detection results. URL: " + s3_url
+              for topic in topics:
+                  sns.publish(TopicArn=topic, Message=message)
+
+          def lambda_handler(event, context):
+              try:
+                  # Extract relevant information from the event
+                  object_key = event['object_key']
+
+                  print("object_key: ", object_key)
+                  # Get the user email from the object key
+                  user_email = get_user_email(object_key)
+                  print("user_email: ", user_email)
+
+                  if user_email:
+                      # Get all matching SNS topics with the user email
+                      matching_topics = get_matching_topics(user_email)
+                      print("matching_topics: ", matching_topics)
+
+                      if matching_topics:
+                          # Send notification to the matching topics with the object key as the message body
+                          send_notification_to_topics(object_key, matching_topics)
+
+                          return {
+                              'statusCode': 200,
+                              'body': 'Notification sent successfully!'
+                          }
+                      else:
+                          return {
+                              'statusCode': 200,
+                              'body': 'No matching topics found for the user!'
+                          }
+                  else:
+                      return {
+                          'statusCode': 400,
+                          'body': 'Invalid object key format!'
+                      }
+                  return "", 200
+
+              except Exception as e:
+                  return {
+                      'statusCode': 500,
+                      'body': f'Error occurred: {str(e)}'
+                  }
+      Role: !Sub ${LambdaRoleARN}
+
+  MyStateMachineV3:
+    Type: 'AWS::StepFunctions::StateMachine'
+    DependsOn: UserImagesBucket
+    Properties:
+      StateMachineName: Term_Assignment_V3
+      RoleArn: 'arn:aws:iam::990326895171:role/LabRole'
+      Definition:
+        Comment: "Image Processing and Annotation Workflow"
+        StartAt: TriggerImageProcessing
+        States:
+          TriggerImageProcessing:
+            Type: Task
+            Resource: !GetAtt S3ImageUploadTriggerFunction.Arn
+            Next: ParallelDetection
+
+          ParallelDetection:
+            Type: Parallel
+            Branches:
+              - StartAt: ProcessFacialAnalysis
+                States:
+                  ProcessFacialAnalysis:
+                    Type: Task
+                    Resource: "arn:aws:states:::lambda:invoke"
+                    OutputPath: "$.Payload"
+                    Parameters:
+                      Payload.$: "$"
+                      FunctionName: !GetAtt ProcessFacialAnalysisFunction.Arn
+                    Retry:
+                      - ErrorEquals:
+                          - "Lambda.ServiceException"
+                          - "Lambda.AWSLambdaException"
+                          - "Lambda.SdkClientException"
+                          - "Lambda.TooManyRequestsException"
+                        IntervalSeconds: 2
+                        MaxAttempts: 6
+                        BackoffRate: 2
+                    End: true
+
+              - StartAt: ProcessCelebrities
+                States:
+                  ProcessCelebrities:
+                    Type: Task
+                    Resource: "arn:aws:states:::lambda:invoke"
+                    OutputPath: "$.Payload"
+                    Parameters:
+                      Payload.$: "$"
+                      FunctionName: !GetAtt ProcessCelebritiesFunction.Arn
+                    Retry:
+                      - ErrorEquals:
+                          - "Lambda.ServiceException"
+                          - "Lambda.AWSLambdaException"
+                          - "Lambda.SdkClientException"
+                          - "Lambda.TooManyRequestsException"
+                        IntervalSeconds: 2
+                        MaxAttempts: 6
+                        BackoffRate: 2
+                    End: true
+
+              - StartAt: ProcessLabels
+                States:
+                  ProcessLabels:
+                    Type: Task
+                    Resource: !GetAtt ProcessLabelsFunction.Arn
+                    End: true
+
+              - StartAt: GetObjectKey
+                States:
+                  GetObjectKey:
+                    Type: Task
+                    Resource: "arn:aws:states:::lambda:invoke"
+                    OutputPath: "$.Payload"
+                    Parameters:
+                      Payload.$: "$"
+                      FunctionName: !GetAtt GetObjectKeyFunction.Arn
+                    Retry:
+                      - ErrorEquals:
+                          - "Lambda.ServiceException"
+                          - "Lambda.AWSLambdaException"
+                          - "Lambda.SdkClientException"
+                          - "Lambda.TooManyRequestsException"
+                        IntervalSeconds: 2
+                        MaxAttempts: 6
+                        BackoffRate: 2
+                    End: true
+
+            Next: FormProcessingReport
+
+          FormProcessingReport:
+            Type: Task
+            Resource: !GetAtt FormProcessingReportFunction.Arn
+            Next: NotifyUsersWithResults
+
+          NotifyUsersWithResults:
+            Type: Task
+            Resource: "arn:aws:states:::lambda:invoke"
+            OutputPath: "$.Payload"
+            Parameters:
+              Payload.$: "$"
+              FunctionName: !GetAtt SendNotificationWithResultsFunction.Arn
+            Retry:
+              - ErrorEquals:
+                  - "Lambda.ServiceException"
+                  - "Lambda.AWSLambdaException"
+                  - "Lambda.SdkClientException"
+                  - "Lambda.TooManyRequestsException"
+                IntervalSeconds: 2
+                MaxAttempts: 6
+                BackoffRate: 2
+            End: true
+
+  MyEventRule:
+    Type: 'AWS::Events::Rule'
+    DependsOn:
+      - UserImagesBucket
+      - MyStateMachineV3
+    Properties:
+      Name: S3EventInvokeStepFunction_v1
+      Description: 'Event rule to trigger Step Functions from S3 events'
+      State: ENABLED
+      RoleArn: 'arn:aws:iam::990326895171:role/LabRole'
+      EventPattern:
+        source:
+          - 'aws.s3'
+        detail-type:
+          - 'Object Created'
+        detail:
+          bucket:
+            name:
+              - 'b00936916-user-images'
+      Targets:
+        - Arn: !GetAtt MyStateMachineV3.Arn
+          Id: "TargetStepFunctionMachineFunction"
+          RoleArn: 'arn:aws:iam::990326895171:role/LabRole'
+
+
+
+Outputs:
+  UserRegistrationTableArn:
+    Description: ARN of the DynamoDB table
+    Value: !GetAtt UserRegistrationTable.Arn
+
+  BackendPublicIp:
+    Description: Private IP address of the backend EC2 instance
+    Value: !GetAtt BackEndEC2Instance.PublicIp
+
+  FrontendPublicIp:
+    Description: Private IP address of the frontend EC2 instance
+    Value: !GetAtt FrontEndEC2Instance.PublicIp
+
+  S3ImageUploadTriggerFunctionArn:
+    Description: ARN of the S3 Image Upload Trigger Lambda function
+    Value: !GetAtt S3ImageUploadTriggerFunction.Arn
+
+  ProcessFacialAnalysisFunctionArn:
+    Description: ARN of the Process Facial Analysis Lambda function
+    Value: !GetAtt ProcessFacialAnalysisFunction.Arn
+
+  ProcessCelebritiesFunctionArn:
+    Description: ARN of the Process Celebrities Lambda function
+    Value: !GetAtt ProcessCelebritiesFunction.Arn
+
+  ProcessLabelsFunctionArn:
+    Description: ARN of the Process Labels Lambda function
+    Value: !GetAtt ProcessLabelsFunction.Arn
+
+  GetObjectKeyFunctionArn:
+    Description: ARN of the Get Object Key Lambda function
+    Value: !GetAtt GetObjectKeyFunction.Arn
+
+  FormProcessingReportFunctionArn:
+    Description: ARN of the Form Processing Report Lambda function
+    Value: !GetAtt FormProcessingReportFunction.Arn
+
+  SendNotificationWithResultsArn:
+    Description: ARN of the Form Processing Report Lambda function
+    Value: !GetAtt SendNotificationWithResultsFunction.Arn
+

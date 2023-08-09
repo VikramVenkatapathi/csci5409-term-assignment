@@ -1,0 +1,86 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Delivery Model}
+The chosen delivery model for the cloud application is a \textbf{Software-as-a-Service (SaaS) model}. In a SaaS delivery model, the application is centrally hosted and managed by the service provider (in this case, the development team/me - the developer ), and users access the application over the Internet. Users do not need to install or maintain any software on their local devices, as the entire application is delivered as a service through a web browser. [23]
+
+\section{Reason for Choosing the Delivery Model}
+\begin{enumerate}
+    \item \textbf{Accessibility and Convenience}: The SaaS delivery model offers a high level of accessibility and convenience for users. They can access the application from any device with an internet connection and a web browser. This eliminates the need for users to install any client-side software, making it easy to use and access the application from anywhere.
+    \item \textbf{Rapid Deployment}: As a SaaS application, the development team can deploy updates and new features quickly and efficiently. Since the application is hosted centrally, there is no need to distribute updates to individual users. This rapid deployment process allows for continuous improvements and enhances the user experience.
+    \item \textbf{Scalability}: SaaS applications are inherently scalable, as the infrastructure is managed by the service provider. As the user base grows, the application can easily accommodate additional users without any disruptions or manual intervention.
+    \item \textbf{Cost-Effective}: The SaaS model is cost-effective for both the service provider and the users. For the service provider, resources can be optimized and shared among users, resulting in cost efficiencies. For users, there are no upfront costs or hardware requirements, as they only pay for the subscription or usage, making it an affordable option.
+    \item \textbf{Maintenance and Support}: With the SaaS model, the development team is responsible for maintaining and supporting the application. Users do not need to worry about updates, patches, or technical issues, as the service provider handles all these aspects. This frees up users' time and resources, allowing them to focus on using the application for their specific tasks.
+    \item \textbf{Security and Data Protection}: The SaaS model enables the development team to implement robust security measures centrally. This ensures that data is protected, and users can trust the application with their sensitive information. Additionally, the team can monitor and respond to security threats proactively.
+    \item \textbf{Global Accessibility}: As a web-based application, the SaaS model enables users from around the world to access and use the application without any geographical limitations. This global accessibility enhances the application's reach and potential user base.
+\end{enumerate}
+
+Considering the nature of the cloud application, the SaaS delivery model aligns well with the goals of providing image analysis capabilities to a broad range of users. The model ensures easy accessibility, continuous updates, and a cost-effective solution for users while allowing the development team to maintain and improve the application efficiently.
+\newline
+\newline
+% \newline\newline\newline
+However, it is essential to acknowledge that the application also incorporates some hybrid components, which involve the use of EC2-Infrastructure-as-a-Service (IaaS) \& S3-Storage-as-a-Service(STaaS).
+
+\section{Justification for Hybrid Components}
+The inclusion of EC2 and S3 complements my architecture by fulfilling the following requirements:
+\begin{enumerate}
+    \item \textbf{Scalability and Flexibility}: EC2 instances provide greater control and flexibility over the application's frontend and backend components, allowing seamless scaling based on traffic demands.
+    \item \textbf{Specialized Storage}: S3 is ideal for storing images and generated reports, offering durable, cost-effective, and scalable data storage.
+\end{enumerate}
+
+While the application primarily operates on a SaaS delivery model, the hybrid components (EC2 and S3) serve specific purposes to enhance overall functionality, scalability, and data storage capabilities. The combination of SaaS, IaaS, and STaaS elements ensures an efficient, cost-effective, and responsive cloud application for image processing and analysis.
+\newpage
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}

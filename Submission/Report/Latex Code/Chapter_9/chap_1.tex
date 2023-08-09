@@ -1,0 +1,83 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Monitoring AWS Lambda for Cost Control}
+The cloud mechanism that would be most important to add monitoring to control costs and prevent unexpected budget escalations is the \textbf{AWS Lambda service}. [18]
+
+\section{Justification} 
+
+AWS Lambda operates on a pay-as-you-go pricing model, where you are billed based on the number of requests for the functions and the time your code executes. While the serverless nature of Lambda is cost-effective for sporadic or event-driven workloads, it can potentially lead to unexpected costs if not monitored carefully.
+
+The following reasons highlight the importance of monitoring AWS Lambda to manage costs effectively:
+\begin{enumerate}
+    \item \textbf{Invocation Rate}: Monitoring the invocation rate of Lambda functions is crucial as each invocation incurs a cost. A sudden spike in requests, such as due to a surge in user activity, could significantly impact costs if not anticipated.
+
+    \item \textbf{Execution Time}: AWS Lambda charges based on the time the code executes. Monitoring the execution time of Lambda functions helps identify functions that consume excessive resources and lead to higher costs.
+
+    \item \textbf{Memory Allocation}: The amount of memory allocated to Lambda functions affects their cost. Monitoring memory usage ensures efficient memory allocation to avoid unnecessary expenses.
+
+    \item \textbf{Cold Starts}: Cold starts occur when a function is invoked after being idle, leading to increased latency and potential costs. Monitoring cold starts helps optimize function performance and reduce the associated costs.
+
+    \item \textbf{Error Rates}: Frequent errors in Lambda functions can result in repeated invocations, leading to higher costs. Monitoring and addressing errors promptly can prevent unnecessary expenses.
+
+    \item \textbf{Exploring Long-Term Alternatives}: Lambdas are suitable for short-term workloads since their execution time is quick. But for long-term aspects, we should look into alternatives. Such as evaluating the feasibility of transitioning certain workloads to other AWS services that may offer more cost-efficient pricing models  
+\end{enumerate}
+
+By closely monitoring AWS Lambda and setting up appropriate alarms, cost control measures can be implemented proactively. You can identify cost patterns, optimize resource allocation, and take corrective actions to prevent budget escalations unexpectedly. Proper monitoring also helps in identifying inefficient functions or code, enabling optimization for cost savings.
+
+
+\newpage
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}

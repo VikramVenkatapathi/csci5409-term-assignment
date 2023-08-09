@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: An example template for a Step Functions state machine and an event rule.
+Resources:
+  MyEventRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Name: S3EventInvokeStepFunction_v2
+      Description: 'Event rule to trigger Step Functions from S3 events'
+      State: ENABLED
+      RoleArn: 'arn:aws:iam::266747933355:role/LabRole'
+      EventPattern:
+        source:
+          - 'aws.s3'
+        detail-type:
+          - 'Object Created'
+        detail:
+          bucket:
+            name:
+              - 'b00936916-user-images'
+      Targets:
+        - Arn: !GetAtt MyStateMachine.Arn
+          Id: "TargetStepFunctionMachineFunction"
+          RoleArn: 'arn:aws:iam::266747933355:role/LabRole'
+
+  MyStateMachineV3:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      StateMachineName: Term_Assignment_V3
+      RoleArn: 'arn:aws:iam::266747933355:role/LabRole'
+      DefinitionString:
+        !Sub |
+          {
+            "Comment": "Image Processing and Annotation Workflow",
+            "StartAt": "TriggerImageProcessing",
+            "States": {
+              "TriggerImageProcessing": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:us-east-1:266747933355:function:S3_Image_Upload_Trigger_v1:$LATEST",
+                "Next": "ParallelDetection"
+              },
+              "ParallelDetection": {
+                "Type": "Parallel",
+                "Branches": [
+                  {
+                    "StartAt": "ProcessFacialAnalysis",
+                    "States": {
+                      "ProcessFacialAnalysis": {
+                        "Type": "Task",
+                        "Resource": "arn:aws:states:::lambda:invoke",
+                        "OutputPath": "$.Payload",
+                        "Parameters": {
+                          "Payload.$": "$",
+                          "FunctionName": "arn:aws:lambda:us-east-1:266747933355:function:ProcessFacialAnalysis_v1:$LATEST"
+                        },
+                        "Retry": [
+                          {
+                            "ErrorEquals": [
+                              "Lambda.ServiceException",
+                              "Lambda.AWSLambdaException",
+                              "Lambda.SdkClientException",
+                              "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                          }
+                        ],
+                        "End": true
+                      }
+                    }
+                  },
+                  {
+                    "StartAt": "ProcessCelebrities",
+                    "States": {
+                      "ProcessCelebrities": {
+                        "Type": "Task",
+                        "Resource": "arn:aws:states:::lambda:invoke",
+                        "OutputPath": "$.Payload",
+                        "Parameters": {
+                          "Payload.$": "$",
+                          "FunctionName": "arn:aws:lambda:us-east-1:266747933355:function:ProcessCelebrities_v1:$LATEST"
+                        },
+                        "Retry": [
+                          {
+                            "ErrorEquals": [
+                              "Lambda.ServiceException",
+                              "Lambda.AWSLambdaException",
+                              "Lambda.SdkClientException",
+                              "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                          }
+                        ],
+                        "End": true
+                      }
+                    }
+                  },
+                  {
+                    "StartAt": "ProcessLabels",
+                    "States": {
+                      "ProcessLabels": {
+                        "Type": "Task",
+                        "Resource": "arn:aws:lambda:us-east-1:266747933355:function:ProcessLabels_v1:$LATEST",
+                        "End": true
+                      }
+                    }
+                  },
+                  {
+                    "StartAt": "GetObjectKey",
+                    "States": {
+                      "GetObjectKey": {
+                        "Type": "Task",
+                        "Resource": "arn:aws:states:::lambda:invoke",
+                        "OutputPath": "$.Payload",
+                        "Parameters": {
+                          "Payload.$": "$",
+                          "FunctionName": "arn:aws:lambda:us-east-1:266747933355:function:GetObjectKey_v1:$LATEST"
+                        },
+                        "Retry": [
+                          {
+                            "ErrorEquals": [
+                              "Lambda.ServiceException",
+                              "Lambda.AWSLambdaException",
+                              "Lambda.SdkClientException",
+                              "Lambda.TooManyRequestsException"
+                            ],
+                            "IntervalSeconds": 2,
+                            "MaxAttempts": 6,
+                            "BackoffRate": 2
+                          }
+                        ],
+                        "End": true
+                      }
+                    }
+                  }
+                ],
+                "Next": "FormProcessingReport"
+              },
+              "FormProcessingReport": {
+                "Type": "Task",
+                "Resource": "arn:aws:lambda:us-east-1:266747933355:function:FormProcessingReport_v1:$LATEST",
+                "Next": "NotifyUsersWithResults"
+              },
+              "NotifyUsersWithResults": {
+                "Type": "Task",
+                "Resource": "arn:aws:states:::lambda:invoke",
+                "OutputPath": "$.Payload",
+                "Parameters": {
+                  "Payload.$": "$",
+                  "FunctionName": "arn:aws:lambda:us-east-1:266747933355:function:SendNotificationWithResults_v1:$LATEST"
+                },
+                "Retry": [
+                  {
+                    "ErrorEquals": [
+                      "Lambda.ServiceException",
+                      "Lambda.AWSLambdaException",
+                      "Lambda.SdkClientException",
+                      "Lambda.TooManyRequestsException"
+                    ],
+                    "IntervalSeconds": 2,
+                    "MaxAttempts": 6,
+                    "BackoffRate": 2
+                  }
+                ],
+                "End": true
+              }
+            }
+          }

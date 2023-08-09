@@ -1,0 +1,17 @@
+To show in demo:
+1. Deploy stack
+2. Explain Architecture diagram
+3. Explain code components 
+    3.1 Backend: Flask App(python) - 3 modules: LoginHandler, RegistrationHandler, ImageProcessingHandler
+        3.1.1 On 1st time login - create SNS topic with the User as subscriber.
+    3.2 Frontend: React App(JS) - 3 pages: Login, Registration, ImageProcessing
+4. Deployment to cloud:
+    4.1 Build Docker image for both frontend and backend
+    4.2 Push to public repository in my personal account
+    4.3 Hosting -> Write User Data script in EC2 to : Pull the images, install necessary stuff, and run the containers.
+    4.4 S3 buckets to store images and procssing report.
+    4.5 DynamoDB to handle registration data.
+    4.6 Eventbridge rule to trigger Step function on image upload (Object Created) event.
+    4.7 7-lambdas in one Step function - state machine to interact with Amazon Rekognition, handle the image detection, and sending report 
+
+5. Create CFT yaml file for all the services

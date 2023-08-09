@@ -1,0 +1,77 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Deployment Model}
+
+For my application, I have chosen a \textbf{Hybrid Cloud deployment model}. I made this decision based on several key factors that align with my application's requirements and objectives. [22]
+
+\begin{enumerate}
+    \item \textbf{Security Concerns}: Firstly, my application has specific security concerns that require me to maintain a high level of control and isolation over sensitive data and services. By adopting a hybrid cloud approach, I can keep the most critical components of my application within a private cloud environment. This allows me to implement stringent security measures, maintain data sovereignty, and ensure compliance with industry regulations.
+
+    \item \textbf{Scalability}: Secondly, while I haven't implemented scalability with a load balancer, I anticipate the possibility of increased resource demands as my user base grows. With the hybrid cloud model, I have the flexibility to scale certain components of my application using the resources available in the public cloud. This enables me to meet varying workloads and spikes in traffic without compromising on security or incurring unnecessary costs.
+    
+    \item \textbf{Cost Feasibility}: Cost-wise, I find that a hybrid cloud deployment is still feasible for my application. By carefully managing resource allocation and leveraging the pay-as-you-go pricing model of the public cloud, I can optimize costs while benefiting from the advantages of cloud computing, such as easy provisioning and dynamic resource allocation.
+    
+    \item \textbf{Geographical Distribution}: Lastly, my application is not geographically distributed, so there is no immediate need to have data and services spread across multiple regions. The hybrid cloud allows me to concentrate my resources in a controlled environment, providing better performance and consistent service delivery to my users.
+\end{enumerate}
+
+In summary, I chose the hybrid cloud deployment model as it strikes the right balance between security, scalability, cost-effectiveness, and performance. It allows me to address my specific security concerns, efficiently handle potential growth, and make the most of cloud resources while maintaining a level of control that aligns with my application's unique needs.
+
+
+
+
+\newpage
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}

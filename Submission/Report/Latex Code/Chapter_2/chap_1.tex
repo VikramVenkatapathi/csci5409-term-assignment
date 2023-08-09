@@ -1,0 +1,202 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Menu Item Requirements}
+\section{User Registration and Login}
+\begin{enumerate}
+    \item Service Used: DynamoDB
+    \item  Alternative Considered: Amazon RDS (Relational Database Service)
+    \item Reason for Selection: 
+    \begin{enumerate}
+        \item DynamoDB was chosen for user registration data storage due to its scalability, low-latency performance, and ease of integration with AWS services. 
+        \item As the application primarily deals with simple user data, a NoSQL database like DynamoDB is well-suited for this purpose. 
+        \item Amazon RDS, while a robust option for relational data, would have been an overkill for storing user registration data, and its pricing model might have been less cost-effective for this specific use case.
+    \end{enumerate}
+    
+\end{enumerate}
+
+\section{Image Upload and Storage}
+\begin{enumerate}
+    \item Service Used: S3 (Simple Storage Service)
+    \item Alternative Considered: EFS (Elastic File System)
+    \item Reason for Selection: 
+    \begin{enumerate}
+        \item S3 was chosen for image storage due to its durability, scalability, and cost-effectiveness. 
+        \item S3 is purpose-built for object storage and ideal for handling image files. 
+        \item  While EFS provides shared file storage with high availability, it is better suited for scenarios where multiple EC2 instances need shared access to the same files. 
+        \item For this application, where images are uploaded by users and later analyzed asynchronously, S3's object storage model fits the requirements perfectly.
+    \end{enumerate}
+\end{enumerate}
+
+\section{Image Analysis and Report Generation}
+\begin{enumerate}
+    \item Services Used: Amazon Rekognition, Step Functions
+    \item  Alternative Considered: AWS Lambda, AWS Batch
+    \item Reason for Selection: 
+    \begin{enumerate}
+        \item Amazon Rekognition was chosen for image analysis due to its powerful AI capabilities, particularly its label detection, celebrity recognition, and facial analysis features.
+        \item This service streamlines the process of image analysis without the need for manual coding.
+        \item Step Functions were selected to orchestrate the analysis workflow as they offer a serverless, scalable, and visually intuitive way to coordinate AWS services.
+        \item While AWS Lambda is suitable for event-driven functions, Step Functions provide better control and coordination for complex workflows. 
+        \item  AWS Batch is more suitable for large-scale batch processing, which is not the primary requirement for this real-time image analysis.
+    \end{enumerate}
+\end{enumerate}
+
+\section{Notification and Event Handling}
+\begin{enumerate}
+    \item Services Used: SNS (Simple Notification Service), Amazon EventBridge
+    \item  Alternative Considered: AWS SQS (Simple Queue Service), Amazon SES (Simple Email Service)
+    \item Reason for Selection: 
+    \begin{enumerate}
+        \item SNS was chosen for sending notifications to users due to its simplicity, ease of use, and support for multiple delivery protocols. 
+        \item  It enables direct communication with users through email, SMS, and other endpoints.
+        \item Amazon EventBridge was utilized to set up rules and triggers for the Step Function whenever an image is uploaded to S3. 
+        \item This serverless event bus simplifies event-driven architectures. While AWS SQS could handle message queuing, SNS's direct communication capabilities were more appropriate for sending notifications to users in real-time.
+        \item  While SES (Simple Email Service) could handle email notifications, it is not available in the academy account. Therefore, SNS provides a suitable alternative for sending notifications via email, SMS, and other protocols
+        
+    \end{enumerate}
+\end{enumerate}
+
+% \newpage
+\section{Cost comparison table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Comparison of Services and Alternatives in Region US-EAST-1 (N. Virginia)}
+    \label{tab:comparison}
+    \begin{tabular}{|p{3cm}|p{3.5cm}|p{3.5cm}|p{6cm}|}
+        \hline
+        \textbf{Service} & \textbf{Pricing} & \textbf{Usage Cost per Month} & \textbf{Reason for Selection} \\
+        \hline
+        \multicolumn{4}{|c|}{\textbf{User Registration and Login}} \\
+        \hline
+        DynamoDB & Pay per provisioned read/write capacity units and storage 
+        & 
+
+   For "Read Request Units (RRU)": \$0.25 per million read request units
+   \newline
+   For "Write Request Units (WRU)": \$1.25 per million write request units
+   \newline
+For "Data Storage": First 25 GB stored per month is free using the DynamoDB Standard table class
+\$0.25 per GB-month thereafter [29]
+
+    
+        & Scalable, low-latency, and cost-effective for user data storage \\
+        \hline
+        Amazon RDS & Pay per instance type and storage & 
+        Standard Instances - db.t4g.micro = \$0.016 /hr
+        \newline
+        General Purpose SSD storage (single AZ) (gp2) - Storage	\$0.115 per GB-month[30]
+        
+        
+        
+        & Overkill for simple user data, cost-effectiveness concerns \\
+        \hline
+        \multicolumn{4}{|c|}{\textbf{Image Upload and Storage}} \\
+        \hline
+        S3 & Pay per storage and data transfer &
+        S3 Standard - General purpose storage for any type of data, typically used for frequently accessed data	
+First 50 TB / Month	\$0.023 per GB
+\newline
+Data Transfer IN = \$0, Data Transfer OUT = \$0,(since no data is transferred out) [31]
+        
+        & Ideal for handling image files, durable and cost-effective \\
+        \hline
+        EFS & Pay per storage and throughput & 
+        Effective storage price (\$0.043/GB-Mo) - One Zone* [32]
+        
+        & Better for shared access to files, not primary requirement \\
+        \hline
+    \end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \caption{Comparison of Services and Alternatives in Region US-EAST-1 (N. Virginia) contd..}
+    \label{tab:comparison2}
+    \begin{tabular}{|p{3cm}|p{3.5cm}|p{3.5cm}|p{6cm}|}
+    \hline
+        \textbf{Service} & \textbf{Pricing} & \textbf{Usage Cost per Month} & \textbf{Reason for Selection} \\
+        \hline
+        \multicolumn{4}{|c|}{\textbf{Image Analysis and Report Generation}} \\
+        \hline
+        Amazon Rekognition & Pay per image & 
+        Group 2 - First 1 million images - \$0.001/image[33]
+        
+        & Powerful AI capabilities, simplifies image analysis \\
+        \hline
+        AWS Lambda & Pay per request and duration &
+        First 6 Billion GB-seconds / month	\$0.0000166667 for every GB-second	\$0.20 per 1M requests[34]
+        
+        & Suitable for event-driven functions, but Step Functions offer better control \\
+        \hline
+        AWS Batch & Pay per vCPU and memory usage & 
+        There is no additional charge for Amazon Batch.You only pay for what you use, as you use it[35]
+        
+        & More suited for large-scale batch processing, not real-time \\
+        \hline
+        \multicolumn{4}{|c|}{\textbf{Notification and Event Handling}} \\
+        \hline
+        SNS & Pay per Email send & Email/Email-JSON - \$2.00 per 100,000 notifications[36] & Simplicity, direct communication with users \\
+        \hline
+        AWS SQS & Pay per request & First 1 Million Requests/Month - FREE [37] & Suitable for message queuing, but not ideal for real-time notifications \\
+        \hline
+        Amazon SES & Pay per email sent and received & Outbound email from non-EC2	\$0.10/1000 emails[38] & Not available in the academy account, SNS provides a suitable alternative \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}

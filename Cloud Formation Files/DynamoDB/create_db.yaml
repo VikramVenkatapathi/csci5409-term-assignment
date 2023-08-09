@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create a DynamoDB table named "UserRegistration" with partition key "Email"
+
+Resources:
+  UserRegistrationTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: UserRegistration
+      AttributeDefinitions:
+        - AttributeName: Email
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Email
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+Outputs:
+  UserRegistrationTableArn:
+    Description: ARN of the DynamoDB table
+    Value: !GetAtt UserRegistrationTable.Arn

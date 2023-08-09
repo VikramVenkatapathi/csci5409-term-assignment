@@ -1,0 +1,29 @@
+aws events put-rule --name S3EventInvokeStepFunction --event-pattern "{\"source\":[\"aws.s3\"],\"detail-type\":[\"AWS API Call via CloudTrail\"],\"detail\":{\"eventSource\":[\"s3.amazonaws.com\"],\"eventName\":[\"PutObject\"]},\"resources\":[\"arn:aws:s3:::b00936916-user-images\"],\"region\":[\"us-east-1\"]}"
+
+aws events put-targets --rule S3EventInvokeStepFunction --targets "Id"="1","Arn"="arn:aws:states:us-east-1:266747933355:stateMachine:MyStateMachine"
+
+aws events put-targets \
+    --region="us-east-1" \
+    --rule S3EventInvokeStepFunction \
+    --targets "Id"="1","Arn"="arn:aws:states:us-east-1:266747933355:stateMachine:MyStateMachine" \
+    --role-arn "arn:aws:iam::266747933355:role/LabRole"
+
+aws events put-targets --region "us-east-1" --rule S3EventInvokeStepFunction --cli-input-json file://target.json
+
+aws cloudformation create-stack \
+    --stack-name MyEventBridgeRuleStack \
+    --template-body file://path/to/eventbridge-rule-cfn-template.yaml \
+    --capabilities CAPABILITY_IAM
+
+aws cloudformation create-stack \
+  --stack-name MyEventBridgeRuleStack \
+  --template-body file://eventbridge-rule-cfn-template.yaml
+
+aws cloudformation create-stack \
+  --stack-name EventRuleStepFunction \
+  --template-body file://eventRule-stepFunction.yaml \
+  --region us-east-1
+
+aws cloudformation create-stack --stack-name EventRuleStepFunction --template-body file://eventRule-stepFunction.yaml --region us-east-1
+
+aws cloudformation delete-stack --stack-name EventRuleStepFunction

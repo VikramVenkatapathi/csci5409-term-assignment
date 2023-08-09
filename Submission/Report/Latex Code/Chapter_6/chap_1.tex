@@ -1,0 +1,88 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Data Security Vulnerabilities \& Resolution in Application Architecture}
+
+\section{Public Buckets}
+One notable security concern is the presence of public buckets in my application. Making buckets public can expose sensitive data to unauthorized access, making it a potential target for malicious actors.
+
+\subsection{Vulnerability}
+The public buckets can be accessed by anyone with the bucket's URL, leading to potential data leaks and unauthorized data modification.
+
+\subsection{Resolution} To address this vulnerability, it is crucial to avoid making buckets public whenever possible. Instead, implement fine-grained access control using AWS IAM (Identity and Access Management) and bucket policies. I can grant specific permissions to authenticated users (e.g., registered users) or specific AWS EC2 instances while denying public access. [19]
+
+\section{Exposed Backend}
+Although my frontend is exposed to the internet while the backend is only accessible to the frontend EC2 instance, there may still be potential risks.
+
+\subsection{Vulnerability}
+If a malicious actor gains access to the frontend EC2 instance, they could potentially leverage it to attempt unauthorized access to the backend.
+
+\subsection{Resolution}
+Implement additional security layers, such as secure communication protocols (e.g., HTTPS) and API authentication mechanisms (e.g., API keys or tokens) between the frontend and backend EC2 instances. Additionally, I can consider using a Virtual Private Cloud (VPC) to isolate the backend EC2 instance from the internet, allowing access only through private IP addresses or VPN connections.
+
+\section{Report Bucket Accessibility}
+While making the bucket public is required for sending the image processing report to users, it introduces a security trade-off.
+
+\subsection{Vulnerability}
+Public access to the report bucket might allow unauthorized users to view or manipulate other users' reports.
+
+\subsection{Resolution}
+To mitigate this risk, I can explore alternatives such as generating pre-signed URLs for the report files, which grant temporary access to specific users only. Additionally, I can consider implementing user authentication and authorization mechanisms to control access to the report bucket based on registered user identities.
+
+\section{Conclusion}
+Addressing these vulnerabilities involves implementing stricter access controls, securing communication channels, and ensuring that sensitive data is accessible only to authorized users and services. By adopting these security measures, my application can significantly improve data security and protect against potential threats and unauthorized access.
+\newpage
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}

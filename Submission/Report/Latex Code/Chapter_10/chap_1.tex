@@ -1,0 +1,91 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Application Evolution and Future Features}
+If I were to continue the development of my application, I would make the following changes:
+\begin{enumerate}
+    \item \textbf{User Authentication and Authorization}: Implement a robust user authentication and authorization system to secure user data and control access to various functionalities. Use AWS Cognito for user management, enabling secure sign-up, login, and user attribute management.
+    
+    \item \textbf{User Profile Management}: Allow users to update their profiles, including profile pictures and other relevant information. Use AWS Lambda to handle profile updates and store user data in DynamoDB.
+
+    \item \textbf{Serverless File Uploads}: Enhance the file upload feature to support multiple file types and larger files. Utilize AWS API Gateway and Lambda to process and store user-uploaded files securely in Amazon S3.
+    
+    \item \textbf{Real-time Notifications}: Integrate WebSocket functionality using AWS API Gateway and AWS Lambda to provide real-time notifications to users, such as when image processing is completed or when new reports are available.
+    
+    \item \textbf{Application Monitoring and Analytics}: Implement monitoring and analytics using AWS CloudWatch and AWS X-Ray to gain insights into application performance, identify bottlenecks, and optimize resource utilization.
+    
+    \item User\textbf{ Access Control for Reports}: Enhance security by allowing users to access only their own reports. Implement AWS IAM-based access control to restrict access to specific S3 objects based on user identity.
+    
+    \item \textbf{Data Backup and Archiving}: Set up automated data backup and archiving processes using AWS Data Lifecycle Manager and Glacier for long-term storage of historical data and reports.
+    
+    \item \textbf{Performance Optimization}: Continuously optimize Lambda functions, frontend code, and database queries to improve application responsiveness and reduce latency.
+    
+    \item \textbf{Cost Optimization}: Regularly review cost metrics and optimize resource allocation. Utilize AWS Cost Explorer to analyze costs and identify opportunities for cost-saving measures.
+    
+    \item \textbf{Geolocation Services}: Integrate geolocation services like Amazon Location Service to add location-based functionality, such as tagging images with location data or displaying image locations on a map.
+    
+    \item \textbf{Enhanced Image Analysis}: Explore additional image analysis capabilities using AWS services like Amazon Rekognition Custom Labels to create custom image classification models tailored to specific use cases.
+    
+    \item \textbf{Data Privacy and Compliance}: Implement data privacy and compliance measures to adhere to relevant regulations. Utilize AWS Key Management Service (KMS) for data encryption at rest and in transit.
+\end{enumerate}
+
+By incorporating these features and leveraging various AWS cloud mechanisms, the application can evolve into a comprehensive and powerful image analysis platform. Continuous development and improvement will ensure that the application meets user needs, maintains high performance, and remains cost-efficient in the dynamic cloud environment.
+
+
+
+
+\newpage
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}

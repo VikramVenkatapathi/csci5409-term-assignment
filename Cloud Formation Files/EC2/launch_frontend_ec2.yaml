@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Launch an EC2 instance with Docker and your Flask application
+
+Parameters:
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - m3.medium
+      - m3.large
+      - m3.xlarge
+      - m3.2xlarge
+    ConstraintDescription: Must be a valid EC2 instance type from the list.
+
+Resources:
+  FrontEndEC2Instance: #EC2 instance for the backend in Flask   
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      InstanceType: !Ref InstanceType
+      # ImageId: !Sub '{{resolve:ssm:/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2:1}}'
+      ImageId: ami-053b0d53c279acc90
+      SecurityGroups:
+        - !Ref FrontendSecurityGroup
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          # Update the system
+          sudo yum update -y
+
+          # Install Docker
+          # sudo yum install -y docker
+          sudo apt install -Y docker
+          sudo yum -y install git
+
+
+          # Start the Docker service.
+          sudo service docker start
+
+          # Add the ec2-user to the docker group so that you can run Docker commands without using sudo.
+          sudo usermod -a -G docker ec2-user
+
+          # Pull the Docker image from Docker Hub
+          docker pull vikramvenkatapathi/cloud_term_assignment_frontend:my-react-app
+
+        
+          # Fetch the backend IP from the S3 bucket
+          # BACKEND_IP=$(aws s3 cp s3://backend-ip/backend_ip.txt -)
+          PRE_SIGNED_URL=$(aws s3 presign s3://backend-ip/backend_ip.txt --expires-in 3600)
+          #downloads the file
+          curl -o backend_ip.txt "$PRE_SIGNED_URL" 
+
+          # Run the Docker container with environment variable
+          docker run -d -p 3000:3000 -e "REACT_APP_API_URL=$BACKEND_IP" vikramvenkatapathi/cloud_term_assignment_frontend:my-react-app
+
+      IamInstanceProfile: LabInstanceProfile #name of instance profile, not ARN!!!
+
+  FrontendSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Enable SSH access and HTTP access
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3000
+          ToPort: 3000
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+
+

@@ -1,0 +1,110 @@
+
+\newpage
+
+% \begin{flushright}
+%     \vspace{10cm}
+%     \rule{18cm}{5pt}
+%     \rule{18cm}{2pt}\vskip1cm
+%     \begin{center}
+%     \begin{bfseries}
+%         \Huge{Explore \& Build a Use Case}\\
+%     \end{bfseries}
+%     \end{center}
+%     \vspace{1cm}
+%     \rule{18cm}{2pt}
+%     \rule{18cm}{5pt}
+% \end{flushright}
+\clearpage
+
+\chapter{Reproducing my architecture on-premise}
+To replicate my cloud-based application on-premise, the organization needs servers(not high-end) for frontend and backend, Docker licenses for efficient image management, a moderately powerful database server, object storage, image processing software licenses, email notification service, and on-premise serverless features for seamless execution. These investments will enable the organization to achieve a secure, scalable, and high-performing on-premise environment for the application.
+
+\section{Cost estimation}
+To estimate the cost of reproducing my architecture on-premise, the organization can use various cloud cost calculators and hardware pricing tools available online. Here are some resources they can use to explore and estimate the expenses:
+
+\subsection{AWS Pricing Calculator}
+The AWS Pricing Calculator allows you to estimate the cost of AWS services based on your usage. While you may not be deploying in the cloud, it can give you an idea of the costs associated with different services, which can help in comparing with on-premise solutions. You can find it on the official AWS website.
+
+
+\subsection{Hardware Vendor Websites}
+Check the websites of hardware vendors (e.g., Dell, HP, Lenovo) to explore the pricing of servers and other hardware components you may need for your on-premise deployment. They often have online configurators that allow you to customize and estimate the cost of your desired hardware setup.
+
+\subsection{Software Licensing Costs}
+Reach out to the respective software vendors (e.g., Docker, image processing software providers) to inquire about the licensing costs for their products. They usually provide pricing information on their websites or through their sales representatives.
+
+\subsection{Email Notification Service Providers}
+For email notification services, explore the pricing plans of email service providers like SendGrid, Mailgun, or Amazon SES. They offer different plans based on the volume of emails sent.
+
+\subsection{Serverless Frameworks}
+If you plan to replicate the serverless features of AWS Lambda on-premise, you can explore open-source serverless frameworks like OpenFaaS, Knative, or Apache OpenWhisk. [39]
+
+\subsection{Database Server Costs}
+Check the prices of database server software like MySQL, PostgreSQL, or Microsoft SQL Server[40], and consider the hardware requirements for running the database efficiently.
+
+\subsection{Object Storage Devices}
+For on-premise object storage, you can explore storage solutions like Network-Attached Storage (NAS) or Storage Area Network (SAN) devices. Check with vendors for pricing and capacity options.\newline
+
+\section{My estimation report}
+To estimate the upfront and ongoing costs for running my application on-premise with 10-100 requests a day, we will consider the following components:
+\begin{enumerate}
+    \item Upfront Costs for servers:
+Servers for Frontend and Backend: Cost will vary based on the specifications and quantity of servers we purchase. Let's assume that we will buy the server: E3-1240 v5 (3.50 GHz), 32GB RAM, 500GB SSD, with an  estimated upfront cost of \$1,748.24 for the required servers. [20] 
+
+    \item Ongoing Costs (Monthly):
+    \begin{enumerate}
+        \item  Power and Cooling: Let's assume an estimated monthly cost of \$500 for power and cooling for the servers.
+        \item Internet Connectivity: Let's assume an estimated monthly cost of \$200 for internet connectivity to support the application's traffic.
+        \item Amazon Rekognition License: First 1 million images : \$0.0010 per image. Based on the estimated 10-100 requests a day, the monthly cost for Amazon Rekognition would be \$3.3 (assuming 100 requests/day for 30 days) [21]
+        \item MongoDB database server -\$57/month for a Dedicated server.[22]
+        \item EMail: SNS- First 1 million Amazon SNS requests per month are free, \$0.50 per 1 million requests thereafter. Hence, no cost for those 300,000 requests/month. [23]
+        \item Serverless cost - entirely depends on no. of requests, time of execution and memory allocated. So, cannot give an estimate.
+    \end{enumerate}
+   \item \textbf{Total cost = 2,451.3 (approx. for the 1st month, including upfront and monthly costs)}
+
+\end{enumerate}
+    
+
+\textbf{NOTE:}
+It's important to note that estimating on-premise costs can be complex, and the actual expenses may vary based on factors such as hardware specifications, software licensing terms, maintenance, power, cooling, and other operational costs. Since cloud providers offer pay-as-you-go models, on-premise costs may involve higher upfront capital expenditures. We must be sure to consider long-term TCO (Total Cost of Ownership) to get a more comprehensive comparison.
+
+
+\newpage
+
+\comment{
+\chapter*{Revision History}
+
+\begin{center}
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+	    Date & Version & Description & Author\\
+        \hline
+	     04-Mar-2021 & 1.0 & Interaction Diagram Document - Initial Release. & All\\
+        \hline
+	    %31 & 32 & 33 & 34\\
+        % \hline
+    \end{tabular}
+\end{center}
+
+
+
+
+\newpage
+\tableofcontents
+}
+
+\comment{
+\chapter{Interaction Diagram}
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-2.png}
+    \caption{\textbf{\textit{Login functionality - Interaction diagram}}}
+    \label{fig:my_label}
+\end{figure}
+
+\begin{figure}[htp]
+    \centering
+    \includegraphics[width=17.5cm]{04 - Interaction Diagram/Quiz Application-1.png}
+    \caption{\textbf{\textit{Quiz Application - Interaction diagram }}}
+    \label{fig:my_label}
+\end{figure}
+}
