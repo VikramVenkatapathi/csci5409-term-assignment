@@ -7,7 +7,7 @@ a combination of modern technologies and AWS cloud services to deliver a seamles
 experience.
 
 ## Documentation
-The [Documentation](./Submission/) of the project contains the detailed description of my project. 
+The [Documentation](./Submission/) of the project contains a detailed description of my project. 
 
 
 
@@ -21,6 +21,10 @@ The [Documentation](./Submission/) of the project contains the detailed descript
 
 ![ SIGN-UP  GIF](./)
 
+
+## Architecture
+
+![Architecture](./Architecture diagram/arch diag.drawio -v2.png)
 
 ## AWS Services
 
