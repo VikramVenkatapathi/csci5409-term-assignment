@@ -7,10 +7,13 @@ a combination of modern technologies and AWS cloud services to deliver a seamles
 experience.
 
 ## Documentation
-The [Documentation](./Submission/) of the project contains a detailed description of my project. 
+The [Documentation](https://github.com/VikramVenkatapathi/csci5409-term-assignment/tree/main/Submission/Report) of the project contains a detailed description of my project. 
 
+## Demo
 
+🔗Link :  https://drive.google.com/file/d/1zSriZxzGk5e8dBypItgE-zxE3quNaC5q/view?usp=sharing
 
+<!--- 
 ## Features
 
 #### Login To An Existing Account 🔑
@@ -21,10 +24,10 @@ The [Documentation](./Submission/) of the project contains a detailed descriptio
 
 ![ SIGN-UP  GIF](./)
 
-
+ --->
 ## Architecture
 
-![Architecture](./Architecture diagram/arch diag.drawio -v2.png)
+![Architecture](https://github.com/VikramVenkatapathi/csci5409-term-assignment/blob/main/Architecture%20diagram/arch%20diag.drawio%20-v2.png)
 
 ## AWS Services
 
@@ -64,8 +67,4 @@ Notification:
 
 
 
-## Demo
 
-Insert gif or link to demo
-
-🔗Link :  https://drive.google.com/file/d/1zSriZxzGk5e8dBypItgE-zxE3quNaC5q/view?usp=sharing
