@@ -7,7 +7,7 @@ a combination of modern technologies and AWS cloud services to deliver a seamles
 experience.
 
 ## Documentation
-The [Documentation](https://github.com/VikramVenkatapathi/csci5409-term-assignment/tree/main/Submission/Report) of the project contains a detailed description of my project. 
+The [Documentation](https://github.com/VikramVenkatapathi/csci5409-term-assignment/tree/main/Submission/Report) section contains a detailed description of my project. 
 
 ## Demo
 
